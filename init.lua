@@ -1,4 +1,3 @@
-local vim = vim
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 vim.opt.nu = true
@@ -218,18 +217,18 @@ local servers = {
                 completion = {
                     callSnippet = 'Replace',
                 },
-                diagnostics = { disable = { 'missing-fields' } },
+                diagnostics = {
+                    disable = { 'missing-fields' },
+                    globals = { 'vim' },
+                },
             },
         },
     },
+    stylua = {},
+    delve = {},
 }
 require('mason').setup()
-local ensure_installed = vim.tbl_keys(servers or {})
-vim.list_extend(ensure_installed, {
-    'stylua',
-    'delve',
-})
-require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+require('mason-tool-installer').setup { ensure_installed = servers }
 require('mason-lspconfig').setup {
     handlers = {
         function(server_name)
