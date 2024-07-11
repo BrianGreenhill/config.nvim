@@ -27,3 +27,5 @@ git submodule add https://github.com/windwp/nvim-autopairs pack/plugins/start/nv
 git submodule add https://github.com/nvim-treesitter/nvim-treesitter pack/plugins/start/nvim-treesitter
 
 git submodule update --init --recursive
+# handle main and master branch names
+git submodule foreach 'git fetch origin && git branch -m master main || true'

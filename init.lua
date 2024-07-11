@@ -66,7 +66,7 @@ require('telescope').setup {
         vimgrep_arguments = {
             'rg', '--color=never', '--no-heading', '--with-filename', '--line-number', '--column', '--smart-case', '--no-ignore', '--hidden',
         },
-        file_ignore_patterns = { '.git', 'node_modules', 'vendor', 'plugged', 'tags', 'autoload' },
+        file_ignore_patterns = { 'pack/plugins/start', '.git', 'node_modules', 'vendor', 'plugged', 'tags', 'autoload' },
         preview = false,
     },
     extensions = {
