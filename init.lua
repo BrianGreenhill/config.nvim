@@ -16,54 +16,18 @@ vim.opt.expandtab = true
 vim.opt.smartindent = true
 vim.opt.clipboard = 'unnamedplus'
 
--- plugins
-
-local Plug = vim.fn['plug#']
-vim.call('plug#begin', '~/.config/nvim/plugged')
-Plug 'tpope/vim-sensible'
-Plug 'tpope/vim-sleuth'
-Plug 'tpope/vim-fugitive'
-Plug 'nvim-lua/plenary.nvim'
-Plug('nvim-telescope/telescope-fzf-native.nvim', { build = 'make' })
-Plug('nvim-telescope/telescope-ui-select.nvim')
-Plug 'folke/neodev.nvim'
-Plug 'williamboman/mason.nvim'
-Plug 'williamboman/mason-lspconfig.nvim'
-Plug 'WhoIsSethDaniel/mason-tool-installer.nvim'
-Plug 'https://git.sr.ht/~whynothugo/lsp_lines.nvim'
-Plug('j-hui/fidget.nvim', { opts = {} })
-Plug 'ray-x/lsp_signature.nvim'
-Plug('nvim-treesitter/nvim-treesitter', { run = ':TSUpdate' })
-Plug 'neovim/nvim-lspconfig'
-Plug('nvim-tree/nvim-web-devicons', { enabled = true })
-Plug 'nvim-lualine/lualine.nvim'
-Plug('nvim-telescope/telescope.nvim')
-Plug 'stevearc/oil.nvim'
-Plug('catppuccin/nvim', { as = 'catppuccin' })
-Plug 'zbirenbaum/copilot.lua'
-Plug 'hrsh7th/nvim-cmp'
-Plug 'hrsh7th/cmp-nvim-lsp'
-Plug 'onsails/lspkind.nvim'
-Plug 'hrsh7th/cmp-nvim-lsp'
-Plug 'hrsh7th/cmp-path'
-Plug 'hrsh7th/cmp-buffer'
-Plug('L3MON4D3/LuaSnip', { run = 'make install_jsregexp' })
-Plug 'saadparwaiz1/cmp_luasnip'
-Plug 'windwp/nvim-autopairs'
-vim.call('plug#end')
-
--- colors
-vim.cmd.colorscheme 'catppuccin'
-
 local set = vim.keymap.set
 set("n", "<leader>w", "<cmd>:w<cr>", { desc = "Save file" })
 set("n", "<leader>q", "<cmd>:q<cr>", { desc = "Quit" })
 set("n", "<leader>s", "<cmd>source $MYVIMRC<cr>:echo 'vimrc sourced'<cr>", { desc = "Source current file" })
 set("n", "<leader>gs", "<cmd>:G<cr>", { desc = "[G]it [s]tatus" })
-set('v', '<leader>y', '"+y') -- <leader>y in vis/norm mode to copy to clipboard
+set('v', '<leader>y', '"+y')
 set('n', '<leader>Y', '"+Y', { noremap = false })
 set('n', '<leader>d', '"_d')
 set('v', '<leader>d', '"_d')
+
+-- colors
+vim.cmd.colorscheme 'catppuccin'
 
 -- oil file management
 require('oil').setup {
@@ -88,11 +52,31 @@ require('copilot').setup({
     },
 })
 
+
 -- telescope
 require('telescope').setup {
+    defaults = {
+        sorting_strategy = 'ascending',
+        layout_strategy = 'vertical',
+        layout_config = {
+            prompt_position = 'top',
+            width = 0.5,
+            height = 0.5,
+        },
+        vimgrep_arguments = {
+            'rg', '--color=never', '--no-heading', '--with-filename', '--line-number', '--column', '--smart-case', '--no-ignore', '--hidden',
+        },
+        file_ignore_patterns = { '.git', 'node_modules', 'vendor', 'plugged', 'tags', 'autoload' },
+        preview = false,
+    },
     extensions = {
         wrap_results = true,
-        fzf = {},
+        fzf = {
+            fuzzy = true,
+            override_generic_sorter = true,
+            override_file_sorter = true,
+            case_mode = 'smart_case',
+        },
         ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
         },
@@ -103,23 +87,12 @@ pcall(require('telescope').load_extension, 'fzf')
 pcall(require('telescope').load_extension, 'ui-select')
 
 local builtin = require 'telescope.builtin'
-set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
-set('n', '<C-p>', builtin.find_files, { desc = '[S]earch [F]iles' })
-set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
-set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
-set('n', '<leader>/', builtin.current_buffer_fuzzy_find, { desc = '[/] Fuzzily search in current buffer' })
-
-vim.keymap.set('n', '<leader>s/', function()
-    builtin.live_grep {
-        additional_args = {
-            '--ignore-case',
-            '--hidden',
-            '--no-ignore',
-            '--vimgrep',
-        },
-        prompt_title = 'Live Grep',
-    }
-end, { desc = '[S]earch [/] by grep' })
+set('n', '<leader>sh', builtin.help_tags)
+set('n', '<C-p>', builtin.find_files)
+set('n', '<leader>sw', builtin.grep_string)
+set('n', '<leader><leader>', builtin.buffers)
+set('n', '<leader>/', builtin.current_buffer_fuzzy_find)
+set('n', '<leader>s/', builtin.live_grep)
 set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config' } end)
 
 -- completion
@@ -257,41 +230,3 @@ require('nvim-treesitter').setup {
 }
 
 require('nvim-treesitter.install').prefer_git = true
-
--- statusline
-
-local theme = require('lualine.themes.catppuccin')
-theme.normal.c.bg = nil
-require('lualine').setup {
-    options = {
-        theme = theme,
-        section_separators = { left = '', right = '' },
-        component_separators = '',
-        icons_enabled = true,
-        disabled_filetypes = {
-            statusline = {},
-            winbar = {},
-        },
-    },
-    sections = {
-        lualine_a = { { 'mode', separator = { left = '' }, right_padding = 2 } },
-        lualine_b = { 'filename', 'branch' },
-        lualine_c = {
-        },
-        lualine_x = {},
-        lualine_y = { 'filetype', 'progress' },
-        lualine_z = {
-            { 'location', separator = { right = '' }, left_padding = 2 },
-        },
-    },
-    inactive_sections = {
-        lualine_a = { 'filename' },
-        lualine_b = {},
-        lualine_c = {},
-        lualine_x = {},
-        lualine_y = {},
-        lualine_z = { 'location' },
-    },
-    tabline = {},
-    extensions = { 'fugitive', 'lazy', 'mason' },
-}
