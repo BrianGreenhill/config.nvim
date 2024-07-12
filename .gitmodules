@@ -25,9 +25,6 @@
 [submodule "pack/plugins/start/mason.nvim"]
 	path = pack/plugins/start/mason.nvim
 	url = https://github.com/williamboman/mason.nvim
-[submodule "pack/plugins/start/fidget.nvim"]
-	path = pack/plugins/start/fidget.nvim
-	url = https://github.com/j-hui/fidget.nvim
 [submodule "pack/plugins/start/lsp_signature.nvim"]
 	path = pack/plugins/start/lsp_signature.nvim
 	url = https://github.com/ray-x/lsp_signature.nvim

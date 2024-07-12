@@ -23,7 +23,6 @@ function plugins {
     git submodule add https://github.com/nvim-telescope/telescope-ui-select.nvim pack/plugins/start/telescope-ui-select.nvim
     git submodule add -b 0.1.x --force https://github.com/nvim-telescope/telescope.nvim pack/plugins/start/telescope.nvim
     git submodule add https://github.com/williamboman/mason.nvim pack/plugins/start/mason.nvim
-    git submodule add https://github.com/j-hui/fidget.nvim pack/plugins/start/fidget.nvim
     git submodule add https://github.com/ray-x/lsp_signature.nvim pack/plugins/start/lsp_signature.nvim
     git submodule add https://github.com/neovim/nvim-lspconfig pack/plugins/start/nvim-lspconfig
     git submodule add https://github.com/stevearc/oil.nvim pack/plugins/start/oil.nvim
