@@ -41,11 +41,8 @@ set("n", "-", "<cmd>Oil<cr>")
 
 -- copilot take my job
 require('copilot').setup({
-    filetypes = { yaml = true },
     suggestion = {
-        enabled = true,
         auto_trigger = true,
-        debounce = 75,
         keymap = {
             accept = "<C-j>",
             dismiss = "<C-]>",
@@ -202,8 +199,14 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 -- treesitter
 require('nvim-treesitter').setup {
-    ensure_installed = { 'go', 'rust', 'ruby', 'bash', 'lua', 'markdown', 'vimdoc' },
+    ensure_installed = { "c", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline", "go", "ruby", "bash", "python" },
+
     auto_install = true,
+    highlight = {
+        enable = true,
+        additional_vim_regex_highlighting = { 'ruby' },
+    },
+    indent = { enable = true, disable = { 'ruby' } },
 }
 
 require('nvim-treesitter.install').prefer_git = true
