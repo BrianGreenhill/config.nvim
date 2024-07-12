@@ -1,48 +1,86 @@
 #!/usr/bin/env bash
+set -e
 
-function remove_unused_submodules {
-    # how to use:
-    # 1. delete submodule from pack/plugins/start
-    # 2. run this script
-    # 3. the submodule will be removed from .gitmodules and .git/config
-    echo "==> Removing unused plugins"
-    for submodule in $(git submodule status | awk '{print $2}'); do
-        if [[ ! -d $submodule ]]; then
-            echo "Removing $submodule"
-            git submodule deinit -f "$submodule"
-            git rm -f "$submodule"
-        fi
-    done
+PLUGIN_DIR="pack/plugins/start"
+
+function add_plugins {
+    plugin_name=$(basename "$1" .git)
+    if [ -d "$PLUGIN_DIR/$plugin_name" ]; then
+        echo "$plugin_name already installed, skipping..."
+        return
+    fi
+    echo "Adding $plugin_name..."
+    if [ -n "$2" ]; then
+        git submodule add -b "$2" "$1" "$PLUGIN_DIR/$plugin_name"
+    else
+        git submodule add "$1" "$PLUGIN_DIR/$plugin_name"
+    fi
 }
 
-function plugins {
-    echo "==> Adding plugins"
-    git submodule add https://github.com/tpope/vim-fugitive pack/plugins/start/vim-fugitive
-    git submodule add https://github.com/nvim-lua/plenary.nvim pack/plugins/start/plenary.nvim
-    git submodule add https://github.com/nvim-telescope/telescope-fzf-native.nvim pack/plugins/start/telescope-fzf-native.nvim
-    git submodule add https://github.com/nvim-telescope/telescope-ui-select.nvim pack/plugins/start/telescope-ui-select.nvim
-    git submodule add -b 0.1.x --force https://github.com/nvim-telescope/telescope.nvim pack/plugins/start/telescope.nvim
-    git submodule add https://github.com/williamboman/mason.nvim pack/plugins/start/mason.nvim
-    git submodule add https://github.com/ray-x/lsp_signature.nvim pack/plugins/start/lsp_signature.nvim
-    git submodule add https://github.com/neovim/nvim-lspconfig pack/plugins/start/nvim-lspconfig
-    git submodule add https://github.com/stevearc/oil.nvim pack/plugins/start/oil.nvim
-    git submodule add https://github.com/catppuccin/nvim pack/plugins/start/nvim
-    git submodule add https://github.com/zbirenbaum/copilot.lua pack/plugins/start/copilot.lua
-    git submodule add https://github.com/hrsh7th/nvim-cmp pack/plugins/start/nvim-cmp
-    git submodule add https://github.com/hrsh7th/cmp-nvim-lsp pack/plugins/start/cmp-nvim-lsp
-    git submodule add https://github.com/hrsh7th/cmp-path pack/plugins/start/cmp-path
-    git submodule add https://github.com/hrsh7th/cmp-buffer pack/plugins/start/cmp-buffer
-    git submodule add https://github.com/windwp/nvim-autopairs pack/plugins/start/nvim-autopairs
-    git submodule add https://github.com/nvim-treesitter/nvim-treesitter pack/plugins/start/nvim-treesitter
-    git submodule add https://github.com/folke/lazydev.nvim pack/plugins/start/lazydev.nvim
+function remove_plugins {
+    plugin_name="$1"
+    if [ ! -d "$PLUGIN_DIR/$plugin_name" ]; then
+        echo "$plugin_name is not installed, skipping..."
+        return
+    fi
+    echo "Removing $plugin_name..."
+    git submodule deinit -f "$PLUGIN_DIR/$plugin_name"
+    rm -rf ".git/modules/$PLUGIN_DIR/$plugin_name"
+    git rm -f "$PLUGIN_DIR/$plugin_name"
+    git commit -m "Remove submodule $plugin_name"
 }
 
 function update_plugins {
-    echo "==> Updating plugins"
+    echo "Updating plugins..."
     git submodule update --init --recursive
-    git submodule foreach 'git fetch origin && git branch -m master main || true'
+    git submodule foreach "
+        branch=\$(git config -f \$toplevel/.gitmodules submodule.\$name.branch);
+        if [ -z \"\$branch\" ]; then
+            if git rev-parse --verify origin/main > /dev/null 2>&1; then
+                branch=main;
+            elif git rev-parse --verify origin/master > /dev/null 2>&1; then
+                branch=master;
+            else
+                echo \"No main or master branch found for submodule \$name, skipping...\";
+                continue;
+            fi
+        fi
+        git fetch origin \$branch &&
+        git checkout \$branch &&
+        git pull origin \$branch
+    "
 }
 
-remove_unused_submodules
-plugins
-update_plugins
+case "$1" in
+    add)
+        if [ -z "$2" ]; then
+            echo "Usage: $0 add <repo-url> [branch]"
+            exit 1
+        fi
+        add_plugins "$2" "$3"
+        ;;
+    update)
+        update_plugins
+        ;;
+    list)
+        echo "Listing plugins..."
+        git submodule status | awk '{print $2}'
+        ;;
+    remove)
+        if [ -z "$2" ]; then
+            echo "Usage: $0 remove <plugin-name>"
+            exit 1
+        fi
+        remove_plugins "$2"
+        ;;
+    sync)
+        echo "Syncing plugins..."
+        git submodule sync --recursive
+        git submodule update --init --recursive
+        ;;
+    *)
+        echo "Usage: $0 {add|update|remove|list|sync} [arguments]"
+        exit 1
+        ;;
+esac
+

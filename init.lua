@@ -1,4 +1,3 @@
-local vim = vim
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 vim.opt.nu = true
@@ -37,12 +36,7 @@ set('v', '<leader>d', '"_d')
 vim.cmd.colorscheme 'catppuccin'
 
 -- oil file management
-require('oil').setup {
-    columns = { 'icon' },
-    view_options = {
-        show_hidden = true,
-    },
-}
+require('oil').setup { view_options = { show_hidden = true } }
 set("n", "-", "<cmd>Oil<cr>")
 
 -- copilot take my job
@@ -138,7 +132,7 @@ local servers = {
                 completion = {
                     callSnippet = 'Replace',
                 },
-                diagonistics = {
+                diagnostics = {
                     enable = true,
                     globals = { 'vim' },
                 },
@@ -208,13 +202,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 -- treesitter
 require('nvim-treesitter').setup {
-    ensure_installed = { 'go', 'rust', 'ruby', 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc', 'help' },
+    ensure_installed = { 'go', 'rust', 'ruby', 'bash', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc', 'help' },
     auto_install = true,
-    highlight = {
-        enable = true,
-        additional_vim_regex_highlighting = { 'ruby' },
-    },
-    indent = { enable = true, disable = { 'ruby' } },
 }
 
 require('nvim-treesitter.install').prefer_git = true
