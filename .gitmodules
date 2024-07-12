@@ -10,9 +10,6 @@
 [submodule "pack/plugins/start/cmp-nvim-lsp"]
 	path = pack/plugins/start/cmp-nvim-lsp
 	url = https://github.com/hrsh7th/cmp-nvim-lsp.git
-[submodule "pack/plugins/start/LuaSnip"]
-	path = pack/plugins/start/LuaSnip
-	url = https://github.com/L3MON4D3/LuaSnip.git
 [submodule "pack/plugins/start/vim-fugitive"]
 	path = pack/plugins/start/vim-fugitive
 	url = https://github.com/tpope/vim-fugitive
@@ -25,21 +22,9 @@
 [submodule "pack/plugins/start/telescope-ui-select.nvim"]
 	path = pack/plugins/start/telescope-ui-select.nvim
 	url = https://github.com/nvim-telescope/telescope-ui-select.nvim
-[submodule "pack/plugins/start/telescope.nvim"]
-	path = pack/plugins/start/telescope.nvim
-	url = https://github.com/nvim-telescope/telescope.nvim
-[submodule "pack/plugins/start/neodev.nvim"]
-	path = pack/plugins/start/neodev.nvim
-	url = https://github.com/folke/neodev.nvim
 [submodule "pack/plugins/start/mason.nvim"]
 	path = pack/plugins/start/mason.nvim
 	url = https://github.com/williamboman/mason.nvim
-[submodule "pack/plugins/start/mason-lspconfig.nvim"]
-	path = pack/plugins/start/mason-lspconfig.nvim
-	url = https://github.com/williamboman/mason-lspconfig.nvim
-[submodule "pack/plugins/start/mason-tool-installer.nvim"]
-	path = pack/plugins/start/mason-tool-installer.nvim
-	url = https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim
 [submodule "pack/plugins/start/fidget.nvim"]
 	path = pack/plugins/start/fidget.nvim
 	url = https://github.com/j-hui/fidget.nvim
@@ -55,21 +40,19 @@
 [submodule "pack/plugins/start/copilot.lua"]
 	path = pack/plugins/start/copilot.lua
 	url = https://github.com/zbirenbaum/copilot.lua
-[submodule "pack/plugins/start/lspkind.nvim"]
-	path = pack/plugins/start/lspkind.nvim
-	url = https://github.com/onsails/lspkind.nvim
 [submodule "pack/plugins/start/cmp-path"]
 	path = pack/plugins/start/cmp-path
 	url = https://github.com/hrsh7th/cmp-path
 [submodule "pack/plugins/start/cmp-buffer"]
 	path = pack/plugins/start/cmp-buffer
 	url = https://github.com/hrsh7th/cmp-buffer
-[submodule "pack/plugins/start/cmp_luasnip"]
-	path = pack/plugins/start/cmp_luasnip
-	url = https://github.com/saadparwaiz1/cmp_luasnip
 [submodule "pack/plugins/start/nvim-autopairs"]
 	path = pack/plugins/start/nvim-autopairs
 	url = https://github.com/windwp/nvim-autopairs
-[submodule "pack/plugins/start/lsp_lines.nvim"]
-	path = pack/plugins/start/lsp_lines.nvim
-	url = https://git.sr.ht/~whynothugo/lsp_lines.nvim
+[submodule "pack/plugins/start/lazydev.nvim"]
+	path = pack/plugins/start/lazydev.nvim
+	url = https://github.com/folke/lazydev.nvim
+[submodule "pack/plugins/start/telescope.nvim"]
+	path = pack/plugins/start/telescope.nvim
+	url = https://github.com/nvim-telescope/telescope.nvim
+	branch = 0.1.x

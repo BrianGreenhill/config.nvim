@@ -64,7 +64,7 @@ local ts = require('telescope')
 ts.setup {
     defaults = {
         vimgrep_arguments = {
-            '--color=never', '--no-heading', '--with-filename', '--line-number', '--column', '--smart-case', '--no-ignore', '--hidden',
+            'rg', '--color=never', '--no-heading', '--with-filename', '--line-number', '--column', '--smart-case', '--no-ignore', '--hidden',
         },
     },
     extensions = {
@@ -89,18 +89,8 @@ set('n', '<leader>s/', builtin.live_grep)
 set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config' } end)
 
 -- completion
-local lspkind = require "lspkind"
-lspkind.init {}
-
 local cmp = require 'cmp'
-local luasnip = require 'luasnip'
-
 cmp.setup {
-    snippet = {
-        expand = function(args)
-            luasnip.lsp_expand(args.body)
-        end,
-    },
     mapping = {
         ['<C-n>'] = cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Insert },
         ['<C-p>'] = cmp.mapping.select_prev_item { behavior = cmp.SelectBehavior.Insert },
@@ -108,28 +98,33 @@ cmp.setup {
     },
     sources = {
         { name = 'nvim_lsp' },
-        { name = 'luasnip' },
         { name = 'path' },
         { name = 'buffer' },
     },
     formatting = {
-        format = lspkind.cmp_format {
-            with_text = true,
-            menu = ({
+        format = function(entry, item)
+            item.menu = ({
                 nvim_lsp = '[LSP]',
-                luasnip = '[Snp]',
                 path = '[Path]',
-                buffer = '[Buf]',
-            }),
-        },
+                buffer = '[Buffer]',
+            })[entry.source.name]
+            return item
+        end
+    },
+    experimental = {
+        ghost_text = true,
+        native_menu = false,
     },
 }
+
+require('mason').setup()
 
 -- autopairs
 require('nvim-autopairs').setup {}
 local cmp_autopairs = require 'nvim-autopairs.completion.cmp'
 cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
 
+-- lsp servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 local lspconfig = require('lspconfig')
@@ -150,17 +145,37 @@ local servers = {
             }
         }
     },
-    bashls = {},
+    bashls = {
+        cmd = { "bash-language-server", "start" },
+        filetypes = { "sh", "bash" },
+        root_dir = lspconfig.util.find_git_ancestor,
+        settings = { shellcheck = { enable = true } }
+    },
     pyright = {},
     tsserver = {
         settings = {
             documentFormattingProvider = false,
         }
     },
+    marksman = {
+        cmd = { "marksman", "server" },
+        filetypes = { "markdown" },
+        root_dir = lspconfig.util.find_git_ancestor,
+        settings = {
+            markdown = {
+                lint = {
+                    enable = true,
+                },
+            },
+        },
+
+    },
 }
 
 for server_name, config in pairs(servers) do
-    lspconfig[server_name].setup(vim.tbl_deep_extend('force', { capabilities = capabilities }, config))
+    lspconfig[server_name].setup(vim.tbl_deep_extend('force', {
+        capabilities = capabilities
+    }, config))
 end
 
 vim.api.nvim_create_autocmd('LspAttach', {
@@ -190,25 +205,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
         end
     end,
 })
-
-require('mason').setup()
-for key, value in pairs({ stylua = {}, delve = {} }) do
-    servers[key] = value
-end
-local ensure_installed = vim.tbl_keys(servers)
-vim.list_extend(ensure_installed, { 'stylua', 'delve' })
-require('mason-tool-installer').setup {
-    ensure_installed = ensure_installed,
-}
-require('mason-lspconfig').setup {
-    handlers = {
-        function(server_name)
-            local server = servers[server_name] or {}
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            lspconfig[server_name].setup(server)
-        end,
-    },
-}
 
 -- treesitter
 require('nvim-treesitter').setup {
