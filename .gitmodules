@@ -46,10 +46,6 @@
 [submodule "pack/plugins/start/lazydev.nvim"]
 	path = pack/plugins/start/lazydev.nvim
 	url = https://github.com/folke/lazydev.nvim
-[submodule "pack/plugins/start/telescope.nvim"]
-	path = pack/plugins/start/telescope.nvim
-	url = https://github.com/nvim-telescope/telescope.nvim.git
-	branch = 0.1.x
 [submodule "pack/plugins/start/nvim-treesitter"]
 	path = pack/plugins/start/nvim-treesitter
 	url = https://github.com/nvim-treesitter/nvim-treesitter.git
