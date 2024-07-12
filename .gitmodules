@@ -49,7 +49,3 @@
 [submodule "pack/plugins/start/lazydev.nvim"]
 	path = pack/plugins/start/lazydev.nvim
 	url = https://github.com/folke/lazydev.nvim
-[submodule "pack/plugins/start/telescope.nvim"]
-	path = pack/plugins/start/telescope.nvim
-	url = https://github.com/nvim-telescope/telescope.nvim
-	branch = 0.1.x
