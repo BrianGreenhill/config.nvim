@@ -33,22 +33,37 @@ function remove_plugins {
 function update_plugins {
     echo "Updating plugins..."
     git submodule update --init --recursive
-    git submodule foreach "
-        branch=\$(git config -f \$toplevel/.gitmodules submodule.\$name.branch);
-        if [ -z \"\$branch\" ]; then
-            if git rev-parse --verify origin/main > /dev/null 2>&1; then
-                branch=main;
-            elif git rev-parse --verify origin/master > /dev/null 2>&1; then
-                branch=master;
-            else
-                echo \"No main or master branch found for submodule \$name, skipping...\";
-                continue;
+
+    function update_submodule {
+        local submodule=$1
+        (
+            cd "$submodule_path" || { echo "Failed to cd into $submodule_path"; exit; }
+
+            # Correct path to the .gitmodules file
+            branch=$(git config -f "$PWD/../../../../.gitmodules" submodule."$submodule_path".branch || true)
+            if [ -z "$branch" ]; then
+                if git rev-parse --verify origin/main > /dev/null 2>&1; then
+                    branch=main
+                elif git rev-parse --verify origin/master > /dev/null 2>&1; then
+                    branch=master
+                else
+                    echo "No main or master branch found for submodule $submodule, skipping..."
+                    exit
+                fi
             fi
-        fi
-        git fetch origin \$branch &&
-        git checkout \$branch &&
-        git pull origin \$branch
-    "
+            git fetch origin "$branch" &&
+            git checkout "$branch" &&
+            git pull origin "$branch"
+        ) &
+    }
+
+    export -f update_submodule
+
+    for submodule_path in $(git submodule status | awk '{print $2}'); do
+        update_submodule "$submodule_path"
+    done
+
+    wait
 }
 
 case "$1" in
@@ -83,4 +98,3 @@ case "$1" in
         exit 1
         ;;
 esac
-

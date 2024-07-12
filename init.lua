@@ -202,7 +202,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 -- treesitter
 require('nvim-treesitter').setup {
-    ensure_installed = { 'go', 'rust', 'ruby', 'bash', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc', 'help' },
+    ensure_installed = { 'go', 'rust', 'ruby', 'bash', 'lua', 'markdown', 'vimdoc' },
     auto_install = true,
 }
 
