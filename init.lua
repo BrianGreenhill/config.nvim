@@ -14,7 +14,6 @@ vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 vim.opt.smartindent = true
-vim.opt.clipboard = 'unnamedplus'
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
 vim.opt.shortmess:append('c')
 vim.opt.undofile = true
@@ -26,11 +25,8 @@ local set = vim.keymap.set
 set("n", "<leader>w", "<cmd>:w<cr>")
 set("n", "<leader>q", "<cmd>:q<cr>")
 set("n", "<leader>s", "<cmd>source $MYVIMRC<cr>:echo 'vimrc sourced'<cr>")
-set("n", "<leader>gs", "<cmd>:G<cr>")
 set('v', '<leader>y', '"+y')
 set('n', '<leader>Y', '"+Y', { noremap = false })
-set('n', '<leader>d', '"_d')
-set('v', '<leader>d', '"_d')
 
 -- colors
 vim.cmd.colorscheme 'catppuccin'
@@ -77,7 +73,12 @@ set('n', '<leader>sw', builtin.grep_string)
 set('n', '<leader><leader>', builtin.buffers)
 set('n', '<leader>/', builtin.current_buffer_fuzzy_find)
 set('n', '<leader>s/', builtin.live_grep)
-set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config' } end)
+set('n', '<leader>sn', function()
+    builtin.find_files {
+        cwd = vim.fn.stdpath 'config',
+        find_command = { 'rg', '--files', '--hidden', '--no-ignore', '--glob', '!.git', '--glob', '!pack', '--glob', '!tags' }
+    }
+end)
 
 -- completion
 local cmp = require 'cmp'
@@ -114,6 +115,7 @@ require('mason').setup()
 require('nvim-autopairs').setup {}
 local cmp_autopairs = require 'nvim-autopairs.completion.cmp'
 cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
+
 
 -- lsp servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -168,6 +170,8 @@ for server_name, config in pairs(servers) do
         capabilities = capabilities
     }, config))
 end
+
+vim.lsp.handlers['textDocument/rename'] = require('telescope').extensions['ui-select'].rename
 
 vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('lsp-attach', { clear = true }),

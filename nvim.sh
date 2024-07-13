@@ -3,6 +3,11 @@ set -e
 
 PLUGIN_DIR="pack/plugins/start"
 
+function helptags {
+    echo "Generating helptags..."
+    nvim --headless -c "helptags ALL" -c 'quit'
+}
+
 function add_plugins {
     plugin_name=$(basename "$1" .git)
     if [ -d "$PLUGIN_DIR/$plugin_name" ]; then
@@ -15,6 +20,7 @@ function add_plugins {
     else
         git submodule add "$1" "$PLUGIN_DIR/$plugin_name"
     fi
+    helptags
 }
 
 function remove_plugins {
@@ -28,6 +34,7 @@ function remove_plugins {
     rm -rf ".git/modules/$PLUGIN_DIR/$plugin_name"
     git rm -f "$PLUGIN_DIR/$plugin_name"
     git commit -m "Remove submodule $plugin_name"
+    helptags
 }
 
 function update_plugins {
@@ -64,6 +71,7 @@ function update_plugins {
     done
 
     wait
+    helptags
 }
 
 case "$1" in
@@ -92,6 +100,9 @@ case "$1" in
         echo "Syncing plugins..."
         git submodule sync --recursive
         git submodule update --init --recursive
+        ;;
+    helptags)
+        helptags
         ;;
     *)
         echo "Usage: $0 {add|update|remove|list|sync} [arguments]"
