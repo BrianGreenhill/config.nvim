@@ -24,15 +24,24 @@ vim.opt.undoreload = 10000
 local set = vim.keymap.set
 set("n", "<leader>w", "<cmd>:w<cr>")
 set("n", "<leader>q", "<cmd>:q<cr>")
-set("n", "<leader>s", "<cmd>source $MYVIMRC<cr>:echo 'vimrc sourced'<cr>")
 set('v', '<leader>y', '"+y')
 set('n', '<leader>Y', '"+Y', { noremap = false })
 
 -- colors
-vim.cmd.colorscheme 'catppuccin'
+require('tokyonight').setup({ style = 'storm', transparent = true })
+vim.cmd.colorscheme 'tokyonight'
+
+require("nvim-treesitter.configs").setup({
+    ensure_installed = { 'c', 'go', 'vimdoc', 'lua', 'bash', 'html' },
+    sync_install = false,
+    auto_install = true,
+    highlight = { enable = true },
+    indent = { enable = true },
+    additional_vim_regex_highlighting = { 'markdown', 'ruby' }
+})
 
 -- oil file management
-require('oil').setup { view_options = { show_hidden = true } }
+require('oil').setup {}
 set("n", "-", "<cmd>Oil<cr>")
 
 -- copilot take my job
@@ -49,11 +58,6 @@ require('copilot').setup({
 -- telescope
 local ts = require('telescope')
 ts.setup {
-    defaults = {
-        vimgrep_arguments = {
-            'rg', '--color=never', '--no-heading', '--with-filename', '--line-number', '--column', '--smart-case', '--no-ignore', '--hidden',
-        },
-    },
     extensions = {
         wrap_results = true,
         fzf = {},
@@ -68,7 +72,7 @@ pcall(ts.load_extension, 'ui-select')
 
 local builtin = require 'telescope.builtin'
 set('n', '<leader>sh', builtin.help_tags)
-set('n', '<C-p>', builtin.find_files)
+set('n', '<leader>sf', builtin.find_files)
 set('n', '<leader>sw', builtin.grep_string)
 set('n', '<leader><leader>', builtin.buffers)
 set('n', '<leader>/', builtin.current_buffer_fuzzy_find)
@@ -77,6 +81,13 @@ set('n', '<leader>sn', function()
     builtin.find_files {
         cwd = vim.fn.stdpath 'config',
         find_command = { 'rg', '--files', '--hidden', '--no-ignore', '--glob', '!.git', '--glob', '!pack', '--glob', '!tags' }
+    }
+end)
+
+set('n', '<leader>sd', function()
+    builtin.find_files {
+        cwd = vim.env.DOTFILES,
+        find_command = { 'rg', '--files', '--hidden', '--no-ignore', '--glob', '!.git' }
     }
 end)
 
@@ -102,11 +113,7 @@ cmp.setup {
             })[entry.source.name]
             return item
         end
-    },
-    experimental = {
-        ghost_text = true,
-        native_menu = false,
-    },
+    }
 }
 
 require('mason').setup()
@@ -115,7 +122,6 @@ require('mason').setup()
 require('nvim-autopairs').setup {}
 local cmp_autopairs = require 'nvim-autopairs.completion.cmp'
 cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
-
 
 -- lsp servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -200,17 +206,3 @@ vim.api.nvim_create_autocmd('LspAttach', {
         end
     end,
 })
-
--- treesitter
-require('nvim-treesitter').setup {
-    ensure_installed = { "c", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline", "go", "ruby", "bash", "python" },
-
-    auto_install = true,
-    highlight = {
-        enable = true,
-        additional_vim_regex_highlighting = { 'ruby' },
-    },
-    indent = { enable = true, disable = { 'ruby' } },
-}
-
-require('nvim-treesitter.install').prefer_git = true

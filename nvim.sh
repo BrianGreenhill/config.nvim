@@ -16,9 +16,9 @@ function add_plugins {
     fi
     echo "Adding $plugin_name..."
     if [ -n "$2" ]; then
-        git submodule add -b "$2" "$1" "$PLUGIN_DIR/$plugin_name"
+        git submodule add --force -b "$2" "$1" "$PLUGIN_DIR/$plugin_name"
     else
-        git submodule add "$1" "$PLUGIN_DIR/$plugin_name"
+        git submodule add --force "$1" "$PLUGIN_DIR/$plugin_name"
     fi
     helptags
 }
