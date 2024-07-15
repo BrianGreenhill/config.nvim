@@ -125,7 +125,6 @@ local servers = {
     gopls = {},
     rust_analyzer = {},
     sorbet = {},
-    vimdoc = {},
     lua_ls = {
         settings = {
             Lua = {
