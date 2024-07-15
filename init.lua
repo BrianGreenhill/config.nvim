@@ -2,6 +2,11 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 vim.opt.nu = true
 vim.opt.rnu = true
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
+vim.opt.smartindent = true
+vim.opt.termguicolors = true
 vim.opt.hlsearch = false
 vim.opt.incsearch = true
 vim.opt.mouse = 'a'
@@ -26,10 +31,36 @@ set("n", "<leader>w", "<cmd>:w<cr>")
 set("n", "<leader>q", "<cmd>:q<cr>")
 set('v', '<leader>y', '"+y')
 set('n', '<leader>Y', '"+Y', { noremap = false })
+set('n', '<leader>nc', '<cmd>:so ~/.config/nvim/init.lua<cr>')
+set('n', '<leader>w', '<cmd>:w<cr>')
+set('n', '<leader>q', '<cmd>:q<cr>')
 
--- colors
-require('tokyonight').setup({ style = 'storm', transparent = true })
-vim.cmd.colorscheme 'tokyonight'
+local vim = vim
+local Plug = vim.fn['plug#']
+vim.call('plug#begin')
+
+Plug('ibhagwan/fzf-lua', { branch = "main" })
+Plug 'rebelot/kanagawa.nvim'
+Plug 'stevearc/oil.nvim'
+Plug 'zbirenbaum/copilot.lua'
+Plug 'windwp/nvim-autopairs'
+Plug('nvim-treesitter/nvim-treesitter', { ['do'] = ':TSUpdate' })
+Plug 'williamboman/mason.nvim'
+Plug 'neovim/nvim-lspconfig'
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-path'
+Plug 'hrsh7th/cmp-cmdline'
+Plug 'hrsh7th/nvim-cmp'
+Plug 'ray-x/lsp_signature.nvim'
+
+vim.call('plug#end')
+
+require('kanagawa').setup({
+    theme = 'dragon',
+    transparent = true,
+})
+vim.cmd.colorscheme 'kanagawa'
 
 require("nvim-treesitter.configs").setup({
     ensure_installed = { 'c', 'go', 'vimdoc', 'lua', 'bash', 'html' },
@@ -40,9 +71,19 @@ require("nvim-treesitter.configs").setup({
     additional_vim_regex_highlighting = { 'markdown', 'ruby' }
 })
 
--- oil file management
-require('oil').setup {}
-set("n", "-", "<cmd>Oil<cr>")
+require('mason').setup()
+
+set('n', '<leader>sf', require('fzf-lua').files)
+set('n', '<leader>sh', require('fzf-lua').help_tags)
+set('n', '<leader>sb', require('fzf-lua').buffers)
+set('n', '<leader>sw', require('fzf-lua').grep_cword)
+set('n', '<leader>s/', require('fzf-lua').grep)
+set('n', '<leader>sq', require('fzf-lua').quickfix)
+set('n', '<leader>sn', function() require('fzf-lua').files({ cwd = vim.fn.stdpath 'config' }) end)
+set('n', '<leader>sd', function() require('fzf-lua').files({ cwd = vim.env.DOTFILES }) end)
+
+require('oil').setup()
+vim.keymap.set('n', '-', '<cmd>:Oil<cr>')
 
 -- copilot take my job
 require('copilot').setup({
@@ -55,43 +96,6 @@ require('copilot').setup({
     },
 })
 
--- telescope
-local ts = require('telescope')
-ts.setup {
-    extensions = {
-        wrap_results = true,
-        fzf = {},
-        ['ui-select'] = {
-            require('telescope.themes').get_dropdown(),
-        },
-    },
-}
-
-pcall(ts.load_extension, 'fzf')
-pcall(ts.load_extension, 'ui-select')
-
-local builtin = require 'telescope.builtin'
-set('n', '<leader>sh', builtin.help_tags)
-set('n', '<leader>sf', builtin.find_files)
-set('n', '<leader>sw', builtin.grep_string)
-set('n', '<leader><leader>', builtin.buffers)
-set('n', '<leader>/', builtin.current_buffer_fuzzy_find)
-set('n', '<leader>s/', builtin.live_grep)
-set('n', '<leader>sn', function()
-    builtin.find_files {
-        cwd = vim.fn.stdpath 'config',
-        find_command = { 'rg', '--files', '--hidden', '--no-ignore', '--glob', '!.git', '--glob', '!pack', '--glob', '!tags' }
-    }
-end)
-
-set('n', '<leader>sd', function()
-    builtin.find_files {
-        cwd = vim.env.DOTFILES,
-        find_command = { 'rg', '--files', '--hidden', '--no-ignore', '--glob', '!.git' }
-    }
-end)
-
--- completion
 local cmp = require 'cmp'
 cmp.setup {
     mapping = {
@@ -116,16 +120,8 @@ cmp.setup {
     }
 }
 
-require('mason').setup()
-
--- autopairs
-require('nvim-autopairs').setup {}
-local cmp_autopairs = require 'nvim-autopairs.completion.cmp'
-cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
-
--- lsp servers
+require('nvim-autopairs').setup({})
 local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 local lspconfig = require('lspconfig')
 local servers = {
     gopls = {},
@@ -150,12 +146,6 @@ local servers = {
         root_dir = lspconfig.util.find_git_ancestor,
         settings = { shellcheck = { enable = true } }
     },
-    pyright = {},
-    tsserver = {
-        settings = {
-            documentFormattingProvider = false,
-        }
-    },
     marksman = {
         cmd = { "marksman", "server" },
         filetypes = { "markdown" },
@@ -177,7 +167,28 @@ for server_name, config in pairs(servers) do
     }, config))
 end
 
-vim.lsp.handlers['textDocument/rename'] = require('telescope').extensions['ui-select'].rename
+cmp.setup {
+    mapping = {
+        ['<C-n>'] = cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Insert },
+        ['<C-p>'] = cmp.mapping.select_prev_item { behavior = cmp.SelectBehavior.Insert },
+        ['<C-y>'] = cmp.mapping.confirm { select = true }
+    },
+    sources = {
+        { name = 'nvim_lsp' },
+        { name = 'path' },
+        { name = 'buffer' },
+    },
+    formatting = {
+        format = function(entry, item)
+            item.menu = ({
+                nvim_lsp = '[LSP]',
+                path = '[Path]',
+                buffer = '[Buffer]',
+            })[entry.source.name]
+            return item
+        end
+    }
+}
 
 vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('lsp-attach', { clear = true }),
@@ -187,8 +198,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
             vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
         end
 
-        map('gd', builtin.lsp_definitions, '[G]oto [D]efinition')
-        map('gr', builtin.lsp_references, '[G]oto [R]eferences')
+        map('gd', require('fzf-lua').lsp_definitions, '[G]oto [D]efinition')
+        map('gr', require('fzf-lua').lsp_references, '[G]oto [R]eferences')
         map('rn', vim.lsp.buf.rename, '[R]e[n]ame')
         map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
         map('K', vim.lsp.buf.hover, 'Hover Documentation')
