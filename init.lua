@@ -56,11 +56,8 @@ Plug 'ray-x/lsp_signature.nvim'
 
 vim.call('plug#end')
 
-require('kanagawa').setup({
-    theme = 'dragon',
-    transparent = true,
-})
-vim.cmd.colorscheme 'kanagawa'
+require('kanagawa').setup({ transparent = true })
+vim.cmd.colorscheme 'kanagawa-dragon'
 
 require("nvim-treesitter.configs").setup({
     ensure_installed = { 'c', 'go', 'vimdoc', 'lua', 'bash', 'html' },
