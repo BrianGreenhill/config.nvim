@@ -70,6 +70,7 @@ require("nvim-treesitter.configs").setup({
 
 require('mason').setup()
 
+require('fzf-lua').setup({ 'max-perf' })
 set('n', '<leader>sf', require('fzf-lua').files)
 set('n', '<leader>sh', require('fzf-lua').help_tags)
 set('n', '<leader>sb', require('fzf-lua').buffers)
